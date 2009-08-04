@@ -96,6 +96,7 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
 
   def teardown
     Jobber::JobsController.locker(nil)
+    Jobber::JobsController.set_scope(nil)
   end
 
   test "i should be able to configure the locker name" do
@@ -106,6 +107,21 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
     end
 
     assert_equal locker_name, @controller.send(:locker)
+  end
+
+  test "I should be able to configure a scope to apply to the Jobber::Job.get" do
+    Factory(:job)
+    expected = Factory(:job, :data => "foo")
+    Factory(:job)
+
+    scope_proc = mock("proc")
+    scope_proc.expects(:call).returns({:conditions => {:data => "foo"}})
+
+    Jobber::JobsController.set_scope scope_proc
+
+    post :create
+
+    assert_equal expected.id, decode(@response.body)['id']
   end
 end
 
