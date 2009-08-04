@@ -95,18 +95,22 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
   tests Jobber::JobsController
 
   def teardown
-    Jobber::JobsController.locker(nil)
+    Jobber::JobsController.locker_name(nil)
     Jobber::JobsController.set_scope(nil)
   end
 
-  test "i should be able to configure the locker name" do
-    locker_name = "nobody"
+  LOCKER_NAME = "nobody"
 
-    Jobber::JobsController.locker do
-      locker_name
-    end
+  test "I should be able to configure the locker name" do
+    Jobber::JobsController.locker_name { LOCKER_NAME }
+    job = Factory(:job)
 
-    assert_equal locker_name, @controller.send(:locker)
+    @controller.stubs(:fetch_job).returns(job)
+    job.expects(:acquire!).with(LOCKER_NAME)
+
+    post :create
+
+    assert_got_job(job)
   end
 
   test "I should be able to configure a scope to apply to the Jobber::Job.get" do
@@ -114,13 +118,31 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
     expected = Factory(:job, :data => "foo")
     Factory(:job)
 
-    scope_proc = mock("proc")
-    scope_proc.expects(:call).returns({:conditions => {:data => "foo"}})
+    called = false
+    Jobber::JobsController.set_scope do
+      called = true
+      {:conditions => {:data => "foo"}}
+    end
 
-    Jobber::JobsController.set_scope scope_proc
 
     post :create
 
+    assert called
+    assert_got_job(expected)
+  end
+
+  test "the job scope should evaled in controller context" do
+    call_context = nil
+    Jobber::JobsController.set_scope do
+      call_context = self
+      {}
+    end
+
+    post :create
+    assert_equal @controller, call_context
+  end
+
+  def assert_got_job(expected)
     assert_equal expected.id, decode(@response.body)['id']
   end
 end

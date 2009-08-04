@@ -1,7 +1,8 @@
 class Jobber::JobsController < ApplicationController
   @@locker_proc = nil
   @@scope_proc = nil
-  def self.locker(arg = nil, &block)
+
+  def self.locker_name(arg = nil, &block)
     @@locker_proc = arg || block
   end
 
@@ -11,10 +12,10 @@ class Jobber::JobsController < ApplicationController
 
 
   def create
-    job = Jobber::Job.scoped(getter_scope).get(params[:skill].to_s.split)
+    job = fetch_job(params[:skill])
 
     if job
-      job.acquire!(locker)
+      job.acquire!(locker_name)
       render :json => job.as_json
     else
       render :nothing => true
@@ -34,11 +35,19 @@ class Jobber::JobsController < ApplicationController
 
   protected
 
-  def getter_scope
-    @@scope_proc ? @@scope_proc.call : {}
+  def fetch_job(skill)
+    job_scope.get(skill.to_s.split)
   end
 
-  def locker
+  def job_scope
+    if @@scope_proc
+      Jobber::Job.scoped(instance_exec(&@@scope_proc))
+    else
+      Jobber::Job
+    end
+  end
+
+  def locker_name
     @@locker_proc ? @@locker_proc.call : "anonymous"
   end
 end
