@@ -148,9 +148,11 @@ class Jobber::JobGetTest < ActiveSupport::TestCase
     assert_equal job2, Jobber::Job.get(:reencrypt)
     assert_equal job1, Jobber::Job.get(:encrypt)
     assert_equal job1, Jobber::Job.get(:reencrypt, :encrypt)
+    assert_equal job1, Jobber::Job.get([:reencrypt, :encrypt])
     assert_equal job2, Jobber::Job.get("reencrypt")
     assert_equal job1, Jobber::Job.get("encrypt")
     assert_equal job1, Jobber::Job.get("reencrypt", "encrypt")
+    assert_equal job1, Jobber::Job.get(["reencrypt", "encrypt"])
   end
 
 end

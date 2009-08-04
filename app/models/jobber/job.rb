@@ -35,7 +35,7 @@ class Jobber::Job < ActiveRecord::Base
 
 
   def self.get(*types)
-    Jobber::Job.available.with_types(types).first
+    Jobber::Job.available.with_types(types.flatten).first
   end
 
   def as_json(*args)
