@@ -86,6 +86,11 @@ class Jobber::Job < ActiveRecord::Base
     Jobber::Job.available.with_types(types.flatten).first
   end
 
+  # enqueues a new job
+  def self.enqueue!(args)
+    create!({:run_at => Time.now}.merge(args))
+  end
+
 
   #
   # Acquires the job (locks it for a client)

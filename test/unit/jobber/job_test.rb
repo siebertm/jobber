@@ -196,3 +196,30 @@ class Jobber::JobGetTest < ActiveSupport::TestCase
   end
 
 end
+
+class Jobber::JobEnqueueTest < ActiveSupport::TestCase
+  JOB_TYPE = "mytype"
+  JOB_DATA = {:some => "data"}
+
+  def setup
+    @time = Time.now
+    Time.stubs(:now).returns(@time)
+
+    @job = Jobber::Job.enqueue!(:type => JOB_TYPE, :data => JOB_DATA)
+    @job = Jobber::Job.find(@job.id)
+  end
+
+  test "should create a new job object with the given type and data" do
+    assert_equal JOB_TYPE, @job.type
+    assert_equal JOB_DATA, @job.data
+  end
+
+  test "the created job object should have a run_at Time.now" do
+    assert_equal @time.to_i, @job.run_at.to_i
+  end
+
+  test "the created job should not be locked" do
+    assert !@job.locked?
+  end
+end
+
