@@ -114,14 +114,14 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
   end
 
   def teardown
-    Jobber::JobsController.locker_name(nil)
-    Jobber::JobsController.set_scope(nil)
+    Jobber::Config.set_locker_name(nil)
+    Jobber::Config.set_scope(nil)
   end
 
   LOCKER_NAME = "nobody"
 
   test "I should be able to configure the locker name" do
-    Jobber::JobsController.locker_name { LOCKER_NAME }
+    Jobber::Config.set_locker_name { LOCKER_NAME }
     job = Jobber::Job.first
 
     @controller.stubs(:fetch_job).returns(job)
@@ -134,7 +134,7 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
 
   test "the locker_name should be evaled in controller context" do
     call_context = nil
-    Jobber::JobsController.locker_name do
+    Jobber::Config.set_locker_name do
       call_context = self
       "me"
     end
@@ -148,7 +148,7 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
     Factory(:job)
 
     called = false
-    Jobber::JobsController.set_scope do
+    Jobber::Config.set_scope do
       called = true
       {:conditions => {:data => "foo"}}
     end
@@ -162,7 +162,7 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
 
   test "the job scope should evaled in controller context" do
     call_context = nil
-    Jobber::JobsController.set_scope do
+    Jobber::Config.set_scope do
       call_context = self
       {}
     end

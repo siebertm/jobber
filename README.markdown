@@ -45,14 +45,14 @@ results. Only the client who locked the job can send back the results.
 
 To set the ``locker_name``, just add the following line to your config/initializers/jobber.rb:
 
-    Jobber::JobsController.locker_name do
+    Jobber::Config.set_locker_name do
       "user_#{current_user.id}"
     end
 
 The second extension point can be used to restrict which jobs will be send to the client. In fact, the return value of the passed block is passed to
 Job.scoped. To set the scope, just add the following lines to your config/initializers/jobber.rb:
 
-    Jobber:JobsController.set_scope do
+    Jobber:Config.set_scope do
       {:conditions => {:user_id => current_user.id}}
     end
 
