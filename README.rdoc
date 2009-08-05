@@ -4,7 +4,7 @@ Jobber aims to be a Rails engine-type plugin which supplies your application wit
 
 Jobs are created by the Rails application (currently, they can't be created by HTTP request, and I don't think it ever will do this) and then sent out
 to the job workers which will work off their job and then send back the result to the server.  handling the results is not done by the plugin, but you
-can register request Processors (objects which respond to the message :process and take 2 arguments) which then handle the results
+can register request Processors (objects which respond to the message :call and take 2 arguments) which then handle the results
 
 *NOTE*: this plugin is currently WIP and not even a plugin. Possibly it won't even work for you :-)
 

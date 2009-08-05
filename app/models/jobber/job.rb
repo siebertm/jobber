@@ -21,8 +21,9 @@ class Jobber::Job < ActiveRecord::Base
     end
   }
 
-  def self.register_processor(type, klass)
-    raise(ArgumentError, "#{klass} does not respond to :process") unless klass.respond_to?(:process)
+  def self.register_processor(type, klass = nil, &block)
+    obj = klass || block
+    raise(ArgumentError, "#{obj} does not respond to :call") unless obj.respond_to?(:call)
 
     self.processors ||= {}
     self.processors[type.to_sym] = klass
