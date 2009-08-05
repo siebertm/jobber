@@ -25,9 +25,12 @@ class Jobber::JobsController < ApplicationController
 
   def update
     job = Jobber::Job.find(params[:id])
-    job.done!
-
-    render :nothing => true
+    if job.locked? && job.locked_by == locker_name
+      job.done!
+      render :nothing => true
+    else
+      render :nothing => true, :status => :bad_request
+    end
   rescue ActiveRecord::RecordNotFound
     render :nothing => true, :status => :not_found
   end

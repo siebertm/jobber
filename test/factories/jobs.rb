@@ -6,6 +6,6 @@ end
 
 Factory.define :locked_job, :parent => :job do |j|
   j.locked_at 1.minute.ago
-  j.locked_by "somebody"
+  j.locked_by "anonymous"
 end
 

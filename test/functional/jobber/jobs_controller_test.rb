@@ -56,7 +56,7 @@ class Jobber::JobsControllerPutTest < ActionController::TestCase
   EXISTING_JOB_ID = '222'
 
   def setup
-    @job = Factory.build(:job)
+    @job = Factory.build(:locked_job)
     @job.stubs(:done!)
 
     Jobber::Job.stubs(:find).with(EXISTING_JOB_ID).returns(@job)
@@ -88,11 +88,30 @@ class Jobber::JobsControllerPutTest < ActionController::TestCase
     assert_response :ok
   end
 
+  test "should only be able to send results if the locker_name is the same" do
+    # the default locker_name is anonymous
+    @job.stubs(:locked_by).returns("not_me")
+    @job.expects(:done!).never
+
+    send_results
+    assert_response :bad_request
+  end
+
+  test "should only be able to send results to locked jobs" do
+    @job.stubs(:locked?).returns(false)
+
+    send_results
+    assert_response :bad_request
+  end
 end
 
 
 class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
   tests Jobber::JobsController
+
+  def setup
+    Factory(:job)
+  end
 
   def teardown
     Jobber::JobsController.locker_name(nil)
@@ -103,7 +122,7 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
 
   test "I should be able to configure the locker name" do
     Jobber::JobsController.locker_name { LOCKER_NAME }
-    job = Factory(:job)
+    job = Jobber::Job.first
 
     @controller.stubs(:fetch_job).returns(job)
     job.expects(:acquire!).with(LOCKER_NAME)
