@@ -113,8 +113,18 @@ class Jobber::ConfiguringJobsControllerTest < ActionController::TestCase
     assert_got_job(job)
   end
 
+  test "the locker_name should be evaled in controller context" do
+    call_context = nil
+    Jobber::JobsController.locker_name do
+      call_context = self
+      "me"
+    end
+
+    post :create
+    assert_equal @controller, call_context
+  end
+
   test "I should be able to configure a scope to apply to the Jobber::Job.get" do
-    Factory(:job)
     expected = Factory(:job, :data => "foo")
     Factory(:job)
 

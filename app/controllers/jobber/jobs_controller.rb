@@ -48,6 +48,6 @@ class Jobber::JobsController < ApplicationController
   end
 
   def locker_name
-    @@locker_proc ? @@locker_proc.call : "anonymous"
+    @@locker_proc ? instance_exec(&@@locker_proc) : "anonymous"
   end
 end
