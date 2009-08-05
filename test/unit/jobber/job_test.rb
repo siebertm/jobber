@@ -36,6 +36,41 @@ end
 
 
 
+class Jobber::JobLockedTest < ActiveSupport::TestCase
+  def setup
+    @job = Factory.stub(:locked_job)
+  end
+
+  test "should return true when locked_by is present and locked_at less than 10 minutes ago" do
+    @job.stubs(:locked_by).returns("me")
+    @job.stubs(:locked_at).returns(9.minutes.ago)
+
+    assert @job.locked?
+  end
+
+  test "should return false when locked_by is nil" do
+    @job.stubs(:locked_by).returns(nil)
+    assert_equal false, @job.locked?
+  end
+
+  test "should return false when locked_by id ''" do
+    @job.stubs(:locked_by).returns("")
+    assert_equal false, @job.locked?
+  end
+
+  test "should return false if locked_at is nil" do
+    @job.stubs(:locked_at).returns(nil)
+    assert_equal false, @job.locked?
+  end
+
+  test "should return false if locked_at is more than 10 minutes ago" do
+    @job.stubs(:locked_at).returns(11.minutes.ago)
+    assert_equal false, @job.locked?
+  end
+end
+
+
+
 class Jobber::JobDoneTest < ActiveSupport::TestCase
   def setup
     @job = Factory(:job)

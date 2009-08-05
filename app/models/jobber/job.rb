@@ -47,6 +47,9 @@ class Jobber::Job < ActiveRecord::Base
     }
   end
 
+  def locked?
+    locked_by.present? && locked_at.present? && locked_at > 10.minutes.ago
+  end
 
   def acquire!(locker)
     self.locked_by = locker
