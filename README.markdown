@@ -60,3 +60,27 @@ Both blocks are instance\_eval'ed in the controller context, so you'll have acce
 params, current\_user, etc).
 
 
+Usage
+-----
+
+To fetch a job to do, just use the HTTP REST interface:
+
+    -> POST /jobs.json {:skill => "deposit, withdraw"}
+    <- 200 OK {:id => 1, :type => "deposit", :data => {:account => "1234", :amount => 200}}
+
+Now the Job with the ID 1 is locked for you. When you're done with the job, PUT the results back to the server:
+
+    -> PUT /jobs/1.json {:job => {:result => "OK"}
+    <- 200 OK
+
+When PUTting a result and you don't have the lock for that job, a 400 Bas Request is returned
+
+
+To enqueue a new Job:
+
+    Jobber::Job.enqueue!(:type => "withdraw", :data => {:account => "1234", :amount => 300})
+
+If you added any custom columns to your jobber_jobs table, just add the values to the Hash passed to `enqueue!`. The `enqueue!` method is not much
+more than a call to `Jobber::Jobs.create!`.
+
+
