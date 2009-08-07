@@ -192,6 +192,7 @@ class Jobber::JobGetTest < ActiveSupport::TestCase
     assert_equal job1, Jobber::Job.get("encrypt")
     assert_equal job1, Jobber::Job.get("reencrypt", "encrypt")
     assert_equal job1, Jobber::Job.get(["reencrypt", "encrypt"])
+    assert_equal nil, Jobber::Job.get(["wrap"])
   end
 
 end

@@ -65,7 +65,7 @@ Usage
 
 To fetch a job to do, just use the HTTP REST interface:
 
-    -> POST /jobs.json {:skill => "deposit, withdraw"}
+    -> POST /jobs.json {:skills => "deposit, withdraw"}
     <- 200 OK {:id => 1, :type => "deposit", :data => {:account => "1234", :amount => 200}}
 
 Now the Job with the ID 1 is locked for you. When you're done with the job, PUT the results back to the server:

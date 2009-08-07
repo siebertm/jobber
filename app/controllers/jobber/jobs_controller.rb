@@ -2,7 +2,7 @@ class Jobber::JobsController < ApplicationController
   unloadable
 
   def create
-    job = fetch_job(params[:skill])
+    job = fetch_job(params[:skills])
 
     if job
       job.acquire!(locker_name)
@@ -16,7 +16,7 @@ class Jobber::JobsController < ApplicationController
   def update
     job = Jobber::Job.find(params[:id])
     if job.locked? && job.locked_by == locker_name
-      job.done!
+      job.done!(params[:job] ? params[:job][:result] : nil)
       render :nothing => true
     else
       render :nothing => true, :status => :bad_request

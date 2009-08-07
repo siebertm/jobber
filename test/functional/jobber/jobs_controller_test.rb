@@ -43,9 +43,9 @@ class Jobber::JobsControllerTestWithOneSuitableJob < ActionController::TestCase
     post :create
   end
 
-  test "should pass the space-separated skill param to the get method" do
+  test "should pass the space-separated skills param to the get method" do
     Jobber::Job.expects(:get).with(["foo", "bar"]).returns(@job)
-    post :create, :skill => "foo bar"
+    post :create, :skills => "foo bar"
   end
 end
 
@@ -73,9 +73,15 @@ class Jobber::JobsControllerPutTest < ActionController::TestCase
     assert_response :not_found
   end
 
-  test "should call the job's done! method" do
-    @job.expects(:done!)
+  test "should call the job's done! method with the passed results" do
+    @job.expects(:done!).with("some result")
     send_results
+  end
+
+  test "should not raise errors when no job or result param is passed" do
+    @job.expects(:done!).with(nil)
+    put :update, {:id => EXISTING_JOB_ID}
+    assert_response :ok
   end
 
   test "should render nothing" do
@@ -103,6 +109,7 @@ class Jobber::JobsControllerPutTest < ActionController::TestCase
     send_results
     assert_response :bad_request
   end
+
 end
 
 
