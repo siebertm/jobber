@@ -116,7 +116,7 @@ class Jobber::Job < ActiveRecord::Base
   #
   # After processing, the Job is destroyed.
   def done!(result = nil)
-    self.class.processor_for(type).process(self, result)
+    self.class.processor_for(type).call(self, result)
     destroy
   end
 

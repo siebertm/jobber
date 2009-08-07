@@ -74,8 +74,7 @@ end
 class Jobber::JobDoneTest < ActiveSupport::TestCase
   def setup
     @job = Factory(:job)
-    @response_processor = mock("processor")
-    @response_processor.stubs(:process)
+    @response_processor = Jobber::DefaultProcessor
     Jobber::Job.stubs(:processor_for).returns(@response_processor)
   end
 
@@ -91,7 +90,7 @@ class Jobber::JobDoneTest < ActiveSupport::TestCase
 
   test "should call process with the response data to the reponse_processor" do
     response = mock("response")
-    @response_processor.expects(:process).with(@job, response).once
+    @response_processor.expects(:call).with(@job, response).once
     @job.done!(response)
   end
 end
