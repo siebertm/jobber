@@ -45,20 +45,11 @@ class Jobber::Job < ActiveRecord::Base
   #
   #   Jobber::Job.register_processor :transfer, BankAccountTransferProcessor
   #
-  # Instead of the klass parameter, you can even pass a block
-  # to the method, which is then used as the processor (hence the
-  # need for a *call* method):
-  #
-  #   Jobber::Job.register_processor :transfer do |job, result|
-  #     ...
-  #   end
-  #
   def self.register_processor(type, klass = nil, &block)
-    obj = klass || block
-    raise(ArgumentError, "#{obj} does not respond to :call") unless obj.respond_to?(:call)
+    raise(ArgumentError, "#{klass} does not respond to :call") unless klass.to_s.constantize.respond_to?(:call)
 
     self.processors ||= {}
-    self.processors[type.to_sym] = klass
+    self.processors[type.to_sym] = klass.to_s
   end
 
 
@@ -143,7 +134,7 @@ class Jobber::Job < ActiveRecord::Base
 
   def self.processor_for(type)
     self.processors ||= {}
-    self.processors[type.to_sym] || Jobber::DefaultProcessor
+    (self.processors[type.to_sym] || "Jobber::DefaultProcessor").to_s.constantize
   end
 
 

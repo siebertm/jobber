@@ -96,52 +96,45 @@ class Jobber::JobDoneTest < ActiveSupport::TestCase
 end
 
 
+class InvalidProcessor; end
+class Processor
+  def self.call(result); end
+end
 
 class Jobber::JobRegisterProcessorTest < ActiveSupport::TestCase
-  class InvalidProcessor; end
-  class Processor
-    def self.call(result); end
-  end
 
   def register(klass, name = :default)
     Jobber::Job.register_processor name, klass
   end
 
   test "should register the processor for later retrieval" do
-    register Processor, :jobtype
+    register :Processor, :jobtype
 
     assert_equal Processor, Jobber::Job.processor_for(:jobtype)
   end
 
   test "should raise an ArgumentError when the given processor does not respond to :call" do
     assert_raise ArgumentError do
-      register InvalidProcessor
+      register :InvalidProcessor
     end
   end
 
   test "should not raise an ArgumentError when the given processor does respond to :call" do
     assert_nothing_raised do
-      register Processor
-    end
-  end
-
-  test "should take a block as processor, too" do
-    assert_nothing_raised do
-      Jobber::Job.register_processor :default do |job, result|
-      end
+      register :Processor
     end
   end
 end
 
 
+class Processor1; def self.call(result); end; end
+class Processor2; def self.call(result); end; end
 
 class Jobber::JobProcessorForTest < ActiveSupport::TestCase
-  class Processor1; def self.call(result); end; end
-  class Processor2; def self.call(result); end; end
 
   def setup
-    Jobber::Job.register_processor(:type1, Processor1)
-    Jobber::Job.register_processor(:type2, Processor2)
+    Jobber::Job.register_processor(:type1, :Processor1)
+    Jobber::Job.register_processor(:type2, :Processor2)
   end
 
   test "should return the Processor set for the given job type if one was found" do
