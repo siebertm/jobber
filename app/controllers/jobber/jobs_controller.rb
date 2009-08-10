@@ -29,7 +29,7 @@ class Jobber::JobsController < ApplicationController
   protected
 
   def fetch_job(skill)
-    job_scope.get(skill.to_s.split)
+    job_scope.get(skill.to_s.split(/[ ,]+/))
   end
 
   def job_scope

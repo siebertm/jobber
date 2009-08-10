@@ -47,6 +47,11 @@ class Jobber::JobsControllerTestWithOneSuitableJob < ActionController::TestCase
     Jobber::Job.expects(:get).with(["foo", "bar"]).returns(@job)
     post :create, :skills => "foo bar"
   end
+
+  test "should pass the comma-separated skills param to the get method" do
+    Jobber::Job.expects(:get).with(["foo", "bar"]).returns(@job)
+    post :create, :skills => "foo,bar"
+  end
 end
 
 class Jobber::JobsControllerPutTest < ActionController::TestCase
