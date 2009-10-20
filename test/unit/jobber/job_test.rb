@@ -70,6 +70,23 @@ class Jobber::JobLockedTest < ActiveSupport::TestCase
 end
 
 
+class Jobber::JobUnlockTest < ActiveSupport::TestCase
+  def setup
+    @job = Factory(:locked_job)
+  end
+
+  test "should set locked_by to nil" do
+    @job.unlock!
+    assert_equal nil, @job.locked_by
+  end
+
+  test "should set locked_at to nil" do
+    @job.unlock!
+    assert_equal nil, @job.locked_at
+  end
+end
+
+
 
 class Jobber::JobDoneTest < ActiveSupport::TestCase
   def setup
@@ -93,12 +110,26 @@ class Jobber::JobDoneTest < ActiveSupport::TestCase
     @response_processor.expects(:call).with(@job, response).once
     @job.done!(response)
   end
+
+
+  test "should not remove the job from the database when the processor returns false" do
+    Jobber::Job.stubs(:processor_for).returns(RejectingProcessor)
+    @job.expects(:unlock!)
+    @job.done!
+
+    assert_not_nil Jobber::Job.find_by_id(@job.id)
+  end
 end
+
 
 
 class InvalidProcessor; end
 class Processor
-  def self.call(result); end
+  def self.call(job, result); end
+end
+
+class RejectingProcessor
+  def self.call(job, result); raise Jobber::ResultRejected; end
 end
 
 class Jobber::JobRegisterProcessorTest < ActiveSupport::TestCase
@@ -127,8 +158,8 @@ class Jobber::JobRegisterProcessorTest < ActiveSupport::TestCase
 end
 
 
-class Processor1; def self.call(result); end; end
-class Processor2; def self.call(result); end; end
+class Processor1; def self.call(job, result); end; end
+class Processor2; def self.call(job, result); end; end
 
 class Jobber::JobProcessorForTest < ActiveSupport::TestCase
 

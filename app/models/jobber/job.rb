@@ -99,6 +99,15 @@ class Jobber::Job < ActiveRecord::Base
   end
 
   #
+  # unlocks a locked job
+  #
+  def unlock!
+    self.locked_by = nil
+    self.locked_at = nil
+    save!
+  end
+
+  #
   # Sets the job as done and processes the result with a registered processor
   #
   # When the job is done, this method should be called with the
@@ -107,8 +116,12 @@ class Jobber::Job < ActiveRecord::Base
   #
   # After processing, the Job is destroyed.
   def done!(result = nil)
-    self.class.processor_for(type).call(self, result)
-    destroy
+    begin
+      self.class.processor_for(type).call(self, result)
+      destroy
+    rescue Jobber::ResultRejected
+      unlock!
+    end
   end
 
   #
